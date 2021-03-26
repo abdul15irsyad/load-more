@@ -4,13 +4,89 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(http-equiv="X-UA-Compatible", content="IE=edge")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        title Express MongoDB Boilerplate
+        title Load More
         link(rel="stylesheet",href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css",integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l",crossorigin="anonymous")
-    body
+        link(rel="stylesheet", href="/css/style.css")
+    body.content.content-home
         .container
-            .row.p-3
+            .row.my-3
                 .col
-                    h1 Express MongoDB Boilerplate
-                    p My boilerplate rest api with express and mongodb
+                    .title.py-3.px-4
+                        h1 Load More
+                        p learning load more concept by abdul15irsyad :)
+                        button.btn.btn-outline-primary(data-toggle="modal",data-target="#add-user-modal")
+                            span Add User
+            .row.my-3.users-list
+            .row.justify-content-center.mt-4.mb-3
+                .col-lg-3.col-4
+                    button.btn.btn-block.btn-outline-primary.btn-load-more Load More
+        #add-user-modal.modal.fade(tabindex="-1",aria-hidden="true")
+            .modal-dialog
+                form#add-user-form.modal-content
+                    .modal-header
+                        h5.modal-title Add User
+                        button.close(type="button",data-dismiss="modal",aria-label="Close")
+                            span(aria-hidden="true") &times;
+                    .modal-body
+                        .form-group
+                            label(for="add-user-name") Name
+                            input#add-user-name.form-control(type="text",name="name",placeholder="Your Name")
+                            small.error.error-name.pl-2
+                        .form-group
+                            label.mn-0(for="add-user-username") 
+                                span Username
+                                br
+                                small.form-text.text-muted username is only letters and numbers
+                            input#add-user-username.form-control(type="text",name="username",placeholder="eg: abdul15irsyad")
+                            small.error.error-username.pl-2
+                        .form-group
+                            label(for="add-user-email") Email
+                            input#add-user-email.form-control(type="text",name="email",placeholder="example@email.com")
+                            small.error.error-email.pl-2
+                        .form-group
+                            label(for="add-user-password") Password
+                            input#add-user-password.form-control(type="password",name="password",placeholder="********")
+                            small.error.error-password.pl-2
+                    .modal-footer
+                        button.btn.btn-outline-secondary(type="button",data-dismiss="modal") Cancel
+                        button.btn.btn-outline-primary(type="submit") Add User
+        #edit-user-modal.modal.fade(tabindex="-1",aria-hidden="true")
+            .modal-dialog
+                form#edit-user-form.modal-content
+                    .modal-header
+                        h5.modal-title Edit User
+                        button.close(type="button",data-dismiss="modal",aria-label="Close")
+                            span(aria-hidden="true") &times;
+                    .modal-body
+                        input.form-control(type="hidden",name="id")
+                        .form-group
+                            label(for="edit-user-name") Name
+                            input#edit-user-name.form-control(type="text",name="name",placeholder="Your Name")
+                            small.error.error-name.pl-2
+                        .form-group
+                            label.mn-0(for="edit-user-username") 
+                                span Username
+                                br
+                                small.form-text.text-muted username is only letters and numbers
+                            input#edit-user-username.form-control(type="text",name="username",placeholder="eg: abdul15irsyad")
+                            small.error.error-username.pl-2
+                        .form-group
+                            label(for="edit-user-email") Email
+                            input#edit-user-email.form-control(type="text",name="email",placeholder="example@email.com")
+                            small.error.error-email.pl-2
+                    .modal-footer
+                        button.btn.btn-outline-secondary(type="button",data-dismiss="modal") Cancel
+                        button.btn.btn-outline-primary(type="submit") Save User
+        template.user-template
+            .user.py-3.px-4
+                h3.user-name
+                p.user-desc.user-username
+                p.user-desc.user-email
+                .text-right.mt-3
+                    button.btn.btn-sm.btn-outline-info.btn-edit.mr-1(data-toggle="modal",data-target="#edit-user-modal") Edit User
+                    button.btn.btn-sm.btn-outline-info.btn-edit-password.mr-1.d-none Edit Password
+                    button.btn.btn-sm.btn-outline-danger.btn-delete Delete
         script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js",integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj",crossorigin="anonymous")
         script(src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js",integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns",crossorigin="anonymous")
+        script(src="https://unpkg.com/axios/dist/axios.min.js")
+        script(src="/js/main.js",type="text/javascript") 

@@ -14,7 +14,7 @@ const validators = {
         .isEmail().withMessage('email not valid'),
     oldPassword: body('oldPassword')
         .notEmpty().withMessage('old password is required'),
-    newPassword: body('password')
+    password: body('password')
         .notEmpty().withMessage('password is required')
         .isLength({ min: 8 }).withMessage('password must be at least 8 characters')
         .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])./).withMessage('password must contain lowercase, uppercase, and number'),
@@ -23,7 +23,7 @@ const validators = {
 }
 
 module.exports = {
-    create: [validators.name, validators.age, validators.username, validators.email],
-    edit: [validators.name, validators.username],
-    editPassword: [validators.oldPassword, validators.newPassword, validators.confirmPassword]
+    create: [validators.name, validators.username, validators.email, validators.password],
+    edit: [validators.name, validators.username, validators.email],
+    editPassword: [validators.oldPassword, validators.password, validators.confirmPassword]
 }

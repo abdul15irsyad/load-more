@@ -18,17 +18,17 @@ const User = require('../../models/User')
 */
 router.get('/', (req, res) => {
     try {
-        let { page, limit, sort } = req.query
-        sort = sort == 'asc' ? 1 : sort == 'desc' ? -1 : sort
+        let { page, limit, sort, sortKey } = req.query
+        let field = ['name', 'username', 'email', 'updatedAt', 'createdAt']
+        sort = sort == 'asc' ? 1 : -1
+        sortKey = sortKey !== null && field.includes(sortKey) ? sortKey : 'createdAt'
         User.paginate({}, {
             pagination: page == "all" ? false : true,
             // hide the password
             select: "-password",
             page: page ? parseInt(page, 10) : 1,
             limit: limit ? parseInt(limit, 10) : 10,
-            sort: {
-                name: parseInt(sort)
-            }
+            sort: { [sortKey]: parseInt(sort) }
         }).then(response => {
             res.status(200).json({
                 status: true,
@@ -101,6 +101,7 @@ router.post('/', create, async (req, res) => {
         User.create({
             name: req.body.name,
             username: req.body.username,
+            email: req.body.email,
             password: await bcrypt.hash(req.body.password, 10),
         }, (err, doc) => {
             // hide password
@@ -151,6 +152,7 @@ router.patch('/:id', edit, async (req, res) => {
         User.findByIdAndUpdate(id, {
             name: req.body.name,
             username: req.body.username,
+            email: req.body.email,
         }, async (err, doc) => {
             if (doc) {
                 res.status(200).json({
