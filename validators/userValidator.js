@@ -3,9 +3,6 @@ const { body } = require("express-validator");
 const validators = {
     name: body('name')
         .notEmpty().withMessage('name is required'),
-    age: body('age')
-        .notEmpty().withMessage('age is required')
-        .isInt({ gt: 0 }).withMessage('age must be an integer and greater than 0'),
     username: body('username')
         .notEmpty().withMessage('username is required')
         .isAlphanumeric().withMessage('username is only letters and numbers'),
