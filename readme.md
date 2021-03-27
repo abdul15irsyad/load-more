@@ -1,5 +1,5 @@
 # Load More
-learning load more concept by abdul15irsyad :)
+learning load more concept
 ![Load More Page](https://github.com/abdul15irsyad/load-more/blob/master/public/images/load-more.jpeg?raw=true)
 
 ## Installation
