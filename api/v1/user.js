@@ -18,11 +18,18 @@ const User = require('../../models/User')
 */
 router.get('/', (req, res) => {
     try {
-        let { page, limit, sort, sortKey } = req.query
+        let { page, limit, sort, sortKey, query } = req.query
         let field = ['name', 'username', 'email', 'updatedAt', 'createdAt']
         sort = sort == 'asc' ? 1 : -1
         sortKey = sortKey !== null && field.includes(sortKey) ? sortKey : 'createdAt'
-        User.paginate({}, {
+        query = query || ''
+        User.paginate({
+            $or: [
+                { name: new RegExp(query, "i") },
+                { username: new RegExp(query, "i") },
+                { email: new RegExp(query, "i") },
+            ]
+        }, {
             pagination: page == "all" ? false : true,
             // hide the password
             select: "-password",

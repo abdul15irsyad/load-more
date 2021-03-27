@@ -1,27 +1,55 @@
-console.log('learning load more concept by abdul15irsyad :)')
+import { getUser, addUser, editUser, deleteUser } from './user.js'
+import {
+    apiBaseUrl,
+    usersList,
+    userTemplate,
+    searchForm,
+    searchInput,
+    searchResult,
+    resultQuery,
+    resultTotalDocs,
+    resetButton,
+    addUserForm,
+    editUserForm,
+    loadMoreButton,
+    page,
+    limit,
+    query,
+} from './global.js'
+import './modal.js'
 
-let apiBaseUrl = `http://localhost:3000`
-let page = 1, limit = 3
-// users
-let usersList = document.querySelector('.users-list')
-let userTemplate = document.querySelector('template.user-template')
-// form
-let addUserForm = document.querySelector('#add-user-form')
-let editUserForm = document.querySelector('#edit-user-form')
-// load more
-let loadMoreButton = document.querySelector('.btn-load-more')
+console.log('learning load more concept')
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadUsers(page, limit)
+    await loadUsers(page.getCurrent(), limit, query.getValue())
+    // input search
+    searchInput.addEventListener('change', e => {
+        query.setValue(e.target.value)
+    })
+    // search form handle submit
+    searchForm.addEventListener('submit', e => {
+        e.preventDefault()
+        searchUser()
+    })
+    // reset search
+    resetButton.addEventListener('click', async e => {
+        e.preventDefault()
+        searchResult.style.display = 'none'
+        page.setCurrent(1)
+        query.setValue('')
+        searchInput.value = ''
+        usersList.innerHTML = ''
+        await loadUsers(page.getCurrent(), limit, query.getValue(), false)
+    })
     // add user form handle submit
     addUserForm.addEventListener('submit', e => {
         e.preventDefault()
-        addUser()
+        addUser({}, loadUsers)
     })
     // edit user form handle submit
     editUserForm.addEventListener('submit', e => {
         e.preventDefault()
-        editUser()
+        editUser({}, loadUsers)
     })
     // load more
     loadMoreButton.addEventListener('click', e => {
@@ -30,179 +58,67 @@ document.addEventListener('DOMContentLoaded', async () => {
     })
 })
 
-let loadUsers = async (page = 1, limit = 3) => {
-    let response = await getUser(`${apiBaseUrl}/api/v1/user?limit=${limit}&sort=desc&sortKey=createdAt&page=${page}`)
-    if (response.nextPage == null) loadMoreButton.style.display = 'none'
-    else loadMoreButton.style.display = 'block'
-    response.docs.forEach(user => {
+const searchUser = async () => {
+    usersList.innerHTML = ''
+    resultQuery.textContent = `"${query.getValue()}"`
+    searchResult.style.display = 'block'
+    page.setCurrent(1)
+    await loadUsers(page.getCurrent(), limit, query.getValue(), true)
+}
+
+const loadUsers = async (page, limit, query = '', searchStatus = false, sortKey = 'updatedAt') => {
+    const response = await getUser(`${apiBaseUrl}/api/v1/user?limit=${limit}&sort=desc&sortKey=${sortKey}&page=${page}&query=${query}`)
+    loadMoreButton.style.display = response.hasNextPage ? 'block' : 'none'
+    if (searchStatus) resultTotalDocs.textContent = response.totalDocs
+    // user not found
+    if (response.docs.length == 0) {
         // column container
-        let columnContainer = document.createElement('div')
-        columnContainer.classList.add('col-lg-4', 'col-md-6', 'col-12', 'my-2')
-        // clone user template
-        let userContainer = userTemplate.content.cloneNode(true);
-        userContainer.querySelector('.user-name').textContent = user.name
-        userContainer.querySelector('.user-username').textContent = user.username
-        userContainer.querySelector('.user-email').textContent = user.email
-        userContainer.querySelector('.btn-edit').setAttribute('data-id', user._id)
-        userContainer.querySelector('.btn-edit-password').setAttribute('data-id', user._id)
-        userContainer.querySelector('.btn-delete').setAttribute('data-id', user._id)
+        const columnContainer = document.createElement('div')
+        columnContainer.classList.add('col-lg-12', 'col-12', 'my-2')
+        const emtpyContainer = document.createElement('div')
+        emtpyContainer.classList.add('alert', 'alert-warning', 'text-center', 'empty')
+        emtpyContainer.innerHTML = 'Opps, user not found!'
         // push to dom
-        columnContainer.append(userContainer)
-        columnContainer.style.display = 'none'
+        columnContainer.append(emtpyContainer)
         usersList.append(columnContainer)
-        columnContainer.style.display = 'block';
-        columnContainer.style.transition = 'opacity 5s linear';
-        // reflow
-        columnContainer.getBoundingClientRect();
-        // it transitions!
-        columnContainer.style.opacity = 1;
-    })
-    // edit button take user id
-    let editButtons = document.querySelectorAll('.btn-edit')
-    editButtons.forEach(editButton => {
-        editButton.addEventListener('click', async () => {
-            let id = editButton.getAttribute('data-id')
-            let user = await getUser(`${apiBaseUrl}/api/v1/user/${id}`)
-            editUserForm.id.value = user._id
-            editUserForm.name.value = user.name
-            editUserForm.username.value = user.username
-            editUserForm.email.value = user.email
+    } else {
+        response.docs.forEach(user => {
+            // column container
+            const columnContainer = document.createElement('div')
+            columnContainer.classList.add('col-lg-4', 'col-md-6', 'col-12', 'my-2')
+            // clone user template
+            const userContainer = userTemplate.content.cloneNode(true);
+            const editButton = userContainer.querySelector('.btn-edit')
+            const deleteButton = userContainer.querySelector('.btn-delete')
+            userContainer.querySelector('.user-name').textContent = user.name
+            userContainer.querySelector('.user-username').textContent = user.username
+            userContainer.querySelector('.user-email').textContent = user.email
+            userContainer.querySelector('.btn-edit').setAttribute('data-id', user._id)
+            userContainer.querySelector('.btn-edit-password').setAttribute('data-id', user._id)
+            userContainer.querySelector('.btn-delete').setAttribute('data-id', user._id)
+            // push to dom
+            columnContainer.append(userContainer)
+            usersList.append(columnContainer)
+            // edit button handler
+            editButton.addEventListener('click', async e => {
+                const id = editButton.getAttribute('data-id')
+                const user = await getUser(`${apiBaseUrl}/api/v1/user/${id}`)
+                editUserForm.id.value = user._id
+                editUserForm.name.value = user.name
+                editUserForm.username.value = user.username
+                editUserForm.email.value = user.email
+            })
+            // delete button handler
+            deleteButton.addEventListener('click', e => {
+                const id = deleteButton.getAttribute('data-id')
+                deleteUser({ id }, loadUsers)
+            })
         })
-    })
-    // delete button take user id
-    let deleteButtons = document.querySelectorAll('.btn-delete')
-    deleteButtons.forEach(deleteButton => {
-        deleteButton.addEventListener('click', async () => {
-            let id = deleteButton.getAttribute('data-id')
-            await deleteUser(id)
-            usersList.innerHTML = ''
-            page = 1
-            loadUsers(page, limit)
-        })
-    })
-}
-
-let getUser = async url => {
-    return new Promise((resolve, reject) => {
-        axios.get(url)
-            .then(response => response.data)
-            .then(response => {
-                resolve(response.data)
-            })
-            .catch(error => {
-                reject(error.response)
-            })
-    })
-}
-
-let deleteUser = async id => {
-    return new Promise((resolve, reject) => {
-        axios.delete(`${apiBaseUrl}/api/v1/user/${id}`)
-            .then(response => response.data)
-            .then(response => {
-                resolve(response.data)
-            })
-            .catch(error => {
-                reject(error.response)
-            })
-    })
-}
-
-let addUser = () => {
-    let formInputs = {
-        name: addUserForm.name.value,
-        username: addUserForm.username.value,
-        email: addUserForm.email.value,
-        password: addUserForm.password.value,
     }
-    axios.post(`${apiBaseUrl}/api/v1/user`, formInputs)
-        .then(() => {
-            $('#add-user-modal').modal('hide')
-            usersList.innerHTML = ''
-            page = 1
-            loadUsers(page, limit)
-        })
-        .catch(error => {
-            if (errorsForm = error.response.data.errors) {
-                let errorAlerts = addUserForm.querySelectorAll('.error')
-                // remove all alerts
-                errorAlerts.forEach(errorAlert => {
-                    errorAlert.classList.remove('active')
-                })
-                // show exist errors
-                errorsForm.forEach(error => {
-                    let errorAlert = addUserForm.querySelector(`.error.error-${error.param}`)
-                    errorAlert.innerHTML = error.msg
-                    errorAlert.classList.add('active')
-                })
-            }
-        })
 }
 
-let editUser = () => {
-    let id = editUserForm.id.value
-    let formInputs = {
-        name: editUserForm.name.value,
-        username: editUserForm.username.value,
-        email: editUserForm.email.value,
-    }
-    axios.patch(`${apiBaseUrl}/api/v1/user/${id}`, formInputs)
-        .then(() => {
-            $('#edit-user-modal').modal('hide')
-            usersList.innerHTML = ''
-            page = 1
-            loadUsers(page, limit)
-        })
-        .catch(error => {
-            if (errorsForm = error.response.data.errors) {
-                let errorAlerts = editUserForm.querySelectorAll('.error')
-                // remove all alerts
-                errorAlerts.forEach(errorAlert => {
-                    errorAlert.classList.remove('active')
-                })
-                // show exist errors
-                errorsForm.forEach(error => {
-                    let errorAlert = editUserForm.querySelector(`.error.error-${error.param}`)
-                    errorAlert.innerHTML = error.msg
-                    errorAlert.classList.add('active')
-                })
-            }
-        })
-}
-
-$('#add-user-modal').on('shown.bs.modal', () => {
-    addUserForm.name.focus()
-})
-
-$('#add-user-modal').on('hidden.bs.modal', () => {
-    addUserForm.name.value = ""
-    addUserForm.username.value = ""
-    addUserForm.email.value = ""
-    addUserForm.password.value = ""
-    let errorAlerts = addUserForm.querySelectorAll('.error')
-    // remove all alerts
-    errorAlerts.forEach(errorAlert => {
-        errorAlert.classList.remove('active')
-    })
-})
-
-$('#edit-user-modal').on('shown.bs.modal', () => {
-    editUserForm.name.focus()
-})
-
-$('#edit-user-modal').on('hidden.bs.modal', () => {
-    editUserForm.name.value = ""
-    editUserForm.username.value = ""
-    editUserForm.email.value = ""
-    let errorAlerts = editUserForm.querySelectorAll('.error')
-    // remove all alerts
-    errorAlerts.forEach(errorAlert => {
-        errorAlert.classList.remove('active')
-    })
-})
-
-let loadMore = async () => {
-    page = page + 1
-    await loadUsers(page, limit)
-    window.scrollTo(0, document.body.scrollHeight);
+const loadMore = async () => {
+    page.increament()
+    await loadUsers(page.getCurrent(), limit, query.getValue())
+    window.scrollTo({ behavior: "smooth", top: document.body.scrollHeight });
 }
